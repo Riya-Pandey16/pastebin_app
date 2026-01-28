@@ -32,13 +32,12 @@ export default async function PastePage({
 
   // 4️⃣ Decrement views
   await prisma.paste.update({
-    where: { id },
-    data: {
-      viewsLeft: paste.viewsLeft - 1,
-      viewCount: paste.viewCount + 1,
-    },
-  });
-
+  where: { id },
+  data: {
+    viewsLeft: paste.viewsLeft === null ? null : paste.viewsLeft - 1,
+    viewCount: paste.viewCount + 1,
+  },
+});
   // 5️⃣ Show content
   return <pre>{paste.content}</pre>;
 }
