@@ -10,7 +10,7 @@ type PageProps = {
 };
 
 export default async function PastePage({ params }: PageProps) {
-  // ✅ UNWRAP params
+  //  UNWRAP params
   const { id } = await params;
 
   if (!id) {
@@ -27,12 +27,12 @@ export default async function PastePage({ params }: PageProps) {
 
   const now = new Date();
 
-  // ⏳ TTL check
+  //  TTL check
   if (paste.expiresAt && paste.expiresAt <= now) {
     notFound();
   }
 
-  // 👀 Max views check
+  //  Max views check
   if (paste.viewsLeft !== null && paste.viewsLeft <= 0) {
     notFound();
   }
