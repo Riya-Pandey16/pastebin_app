@@ -23,8 +23,8 @@ export default function Home() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         content,
-        ttl_seconds: ttl ? Number(ttl) : undefined,
-        max_views: maxViews ? Number(maxViews) : undefined,
+        ttl: ttl ? Number(ttl) : null,
+        maxViews: maxViews ? Number(maxViews) : null,
       }),
     });
 

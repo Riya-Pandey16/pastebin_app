@@ -3,41 +3,49 @@ import { notFound } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
-export default async function PastePage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+type PageProps = {
+  params: Promise<{
+    id: string;
+  }>;
+};
+
+export default async function PastePage({ params }: PageProps) {
+  // ✅ UNWRAP params
   const { id } = await params;
-  if (!id) notFound();
 
-  const now = new Date();
+  if (!id) {
+    notFound();
+  }
 
-  // 1️ Fetch paste
   const paste = await prisma.paste.findUnique({
     where: { id },
   });
 
-  if (!paste) notFound();
+  if (!paste) {
+    notFound();
+  }
 
-  //  Check expiry
+  const now = new Date();
+
+  // ⏳ TTL check
   if (paste.expiresAt && paste.expiresAt <= now) {
     notFound();
   }
 
-  //  Check views
-  if (paste.viewsLeft === 0) {
+  // 👀 Max views check
+  if (paste.viewsLeft !== null && paste.viewsLeft <= 0) {
     notFound();
   }
 
-  // Decrement views
+  // ⬇ Decrement views
   await prisma.paste.update({
-  where: { id },
-  data: {
-    viewsLeft: paste.viewsLeft === null ? null : paste.viewsLeft - 1,
-    viewCount: paste.viewCount + 1,
-  },
-});
-  //  Show content
+    where: { id },
+    data: {
+      viewsLeft:
+        paste.viewsLeft !== null ? paste.viewsLeft - 1 : null,
+      viewCount: paste.viewCount + 1,
+    },
+  });
+
   return <pre>{paste.content}</pre>;
 }

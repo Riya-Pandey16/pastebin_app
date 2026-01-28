@@ -8,15 +8,18 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Empty paste" }, { status: 400 });
   }
 
-  const expiresAt = ttl
-    ? new Date(Date.now() + Number(ttl) * 1000)
-    : null;
+  const expiresAt =
+    ttl && Number(ttl) > 0
+      ? new Date(Date.now() + Number(ttl) * 1000)
+      : null;
 
   const paste = await prisma.paste.create({
     data: {
       content,
       expiresAt,
-      maxViews: maxViews ? Number(maxViews) : null,
+      maxViews,
+      viewsLeft: maxViews,
+      viewCount: 0,
     },
   });
 
