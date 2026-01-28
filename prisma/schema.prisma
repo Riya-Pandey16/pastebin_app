@@ -13,5 +13,5 @@ model Paste {
   expiresAt   DateTime?
   maxViews    Int?
   viewCount   Int      @default(0)
-  viewsLeft   Int?     // ✅ make optional
+  viewsLeft   Int?     // 
 }

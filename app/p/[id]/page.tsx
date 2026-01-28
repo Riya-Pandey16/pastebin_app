@@ -13,24 +13,24 @@ export default async function PastePage({
 
   const now = new Date();
 
-  // 1️⃣ Fetch paste
+  // 1️ Fetch paste
   const paste = await prisma.paste.findUnique({
     where: { id },
   });
 
   if (!paste) notFound();
 
-  // 2️⃣ Check expiry
+  //  Check expiry
   if (paste.expiresAt && paste.expiresAt <= now) {
     notFound();
   }
 
-  // 3️⃣ Check views
+  //  Check views
   if (paste.viewsLeft === 0) {
     notFound();
   }
 
-  // 4️⃣ Decrement views
+  // Decrement views
   await prisma.paste.update({
   where: { id },
   data: {
@@ -38,6 +38,6 @@ export default async function PastePage({
     viewCount: paste.viewCount + 1,
   },
 });
-  // 5️⃣ Show content
+  //  Show content
   return <pre>{paste.content}</pre>;
 }
