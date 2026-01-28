@@ -1,66 +1,90 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+"use client";
+
+import { useState } from "react";
 
 export default function Home() {
+  const [content, setContent] = useState("");
+  const [ttl, setTtl] = useState("");
+  const [maxViews, setMaxViews] = useState("");
+  const [result, setResult] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  async function createPaste() {
+    setError(null);
+    setResult(null);
+
+    if (!content.trim()) {
+      setError("Content cannot be empty");
+      return;
+    }
+
+    const res = await fetch("/api/pastes", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        content,
+        ttl_seconds: ttl ? Number(ttl) : undefined,
+        max_views: maxViews ? Number(maxViews) : undefined,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      setError(data.error || "Something went wrong");
+      return;
+    }
+
+    setResult(data.url);
+    setContent("");
+    setTtl("");
+    setMaxViews("");
+  }
+
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <main style={{ maxWidth: 600, margin: "40px auto" }}>
+      <h1>Pastebin Lite</h1>
+
+      <textarea
+        placeholder="Enter your text here..."
+        rows={10}
+        style={{ width: "100%" }}
+        value={content}
+        onChange={(e) => setContent(e.target.value)}
+      />
+
+      <div style={{ marginTop: 10 }}>
+        <input
+          type="number"
+          placeholder="TTL (seconds)"
+          value={ttl}
+          onChange={(e) => setTtl(e.target.value)}
         />
-        <div className={styles.intro}>
-          <h1>To get started, edit the page.tsx file.</h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
+      </div>
+
+      <div style={{ marginTop: 10 }}>
+        <input
+          type="number"
+          placeholder="Max views"
+          value={maxViews}
+          onChange={(e) => setMaxViews(e.target.value)}
+        />
+      </div>
+
+      <button style={{ marginTop: 20 }} onClick={createPaste}>
+        Create Paste
+      </button>
+
+      {error && <p style={{ color: "red" }}>{error}</p>}
+
+      {result && (
+        <p>
+          Paste URL:{" "}
+          <a href={result} target="_blank">
+            {result}
           </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+        </p>
+      )}
+    </main>
   );
 }
